@@ -13,19 +13,44 @@
     <script type="text/babel">
         const { useState } = React;
 
-        const animalsChoices = ["Cane", "Gatto", "Pappagallo", "Cavallo", "Panda"];
+        function Modal({ title, content, show = false, onClose = () => { }, onConfirm = () => { } }) {
+            return show && ReactDOM.createPortal(
+                <div className="modal-container">
+                    <div className="modal">
+                        <h2>{title}</h2>
+                        <div>{content}</div>
+                        <div className="modal-buttons">
+                            <button onClick={onClose}>Annulla</button>
+                            <button onClick={onConfirm}>Conferma</button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            );
+        }
 
         function ListaAnimali() {
             const [animals, setAnimals] = useState([]);
+            const [showModal, setShowModal] = useState(false);
+            const [newAnimal, setNewAnimal] = useState("");
 
-            const aggiungiAnimale = () => {
-                const animaleCasuale = animalsChoices[Math.floor(Math.random() * animalsChoices.length)];
-                setAnimals([...animals, animaleCasuale]);
+            const handleConfirm = () => {
+                if (newAnimal.trim()) {
+                    setAnimals([...animals, newAnimal.trim()]);
+                    setNewAnimal("");
+                }
+                setShowModal(false);
+            };
+
+            const handleClose = () => {
+                setNewAnimal("");
+                setShowModal(false);
             };
 
             return (
                 <div>
-                    <button onClick={aggiungiAnimale}>Aggiungi Animale</button>
+                    <button onClick={() => setShowModal(true)}>Aggiungi Animale</button>
+
                     <details>
                         <summary>Animali</summary>
                         <ul>
@@ -34,11 +59,26 @@
                             ))}
                         </ul>
                     </details>
+
+                    <Modal
+                        title="Aggiungi un nuovo animale"
+                        show={showModal}
+                        onClose={handleClose}
+                        onConfirm={handleConfirm}
+                        content={
+                            <input
+                                type="text"
+                                value={newAnimal}
+                                placeholder="Nome dell'animale"
+                                onChange={(e) => setNewAnimal(e.target.value)}
+                            />
+                        }
+                    />
                 </div>
             );
         }
 
-        const root = ReactDOM.createRoot(document.querySelector('.lista-animali'));
+        const root = ReactDOM.createRoot(document.querySelector(".lista-animali"));
         root.render(<ListaAnimali />);
     </script>
 </head>
